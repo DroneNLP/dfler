@@ -234,20 +234,23 @@ def run_report(config):
 def main():
     parser = argparse.ArgumentParser(description="Drone Flight Log Entity Recognizer (DFLER)")
     
-    # Global arguments
-    parser.add_argument("--config", help="Path to configuration file")
-    parser.add_argument("--output", help="Output directory")
-    parser.add_argument("--evidence", help="Evidence directory")
-    parser.add_argument("--model", help="Model directory")
+    # Commons arguments
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    parent_parser.add_argument("--config", help="Path to configuration file")
+    parent_parser.add_argument("--output", help="Output directory")
+    parent_parser.add_argument("--evidence", help="Evidence directory")
+    parent_parser.add_argument("--model", help="Model directory")
+
+    parser = argparse.ArgumentParser(description="Drone Flight Log Entity Recognizer (DFLER)")
     
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
     
     # Subcommands
-    subparsers.add_parser("check", help="Check evidence files")
-    subparsers.add_parser("timeline", help="Construct forensic timeline")
-    subparsers.add_parser("ner", help="Run Named Entity Recognition")
-    subparsers.add_parser("report", help="Generate forensic report")
-    subparsers.add_parser("all", help="Run all steps")
+    subparsers.add_parser("check", help="Check evidence files", parents=[parent_parser])
+    subparsers.add_parser("timeline", help="Construct forensic timeline", parents=[parent_parser])
+    subparsers.add_parser("ner", help="Run Named Entity Recognition", parents=[parent_parser])
+    subparsers.add_parser("report", help="Generate forensic report", parents=[parent_parser])
+    subparsers.add_parser("all", help="Run all steps", parents=[parent_parser])
     
     args = parser.parse_args()
 

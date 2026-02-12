@@ -33,3 +33,8 @@ dfler = "dfler.dfler:main"
 [project.urls]
 "Homepage" = "https://github.com/DroneNLP/dfler"
 "Bug Tracker" = "https://github.com/DroneNLP/dfler/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dfler*"]
+namespaces = false
