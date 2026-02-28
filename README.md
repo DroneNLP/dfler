@@ -36,18 +36,8 @@ DFLER provides a Command Line Interface (CLI).
 
 **Structure:**
 ```bash
-dfler <command> [arguments]
+dfler [arguments]
 ```
-
-### Commands
-
-| Command | Description |
-| :--- | :--- |
-| `check` | Check evidence files in the input directory. |
-| `timeline` | Parse logs and construct a sorted forensic timeline CSV. |
-| `ner` | Run Named Entity Recognition on the timeline using the model. |
-| `report` | Generate a PDF forensic report (requires `wkhtmltopdf`). |
-| `all` | Run all steps sequentially (check -> timeline -> ner -> report). |
 
 ### Arguments
 
@@ -60,24 +50,19 @@ dfler <command> [arguments]
 
 ### Examples
 
-**1. Run Everything (Recommended):**
+**1. Run Pipeline (Recommended):**
 ```bash
-dfler all --evidence "./flight_logs" --output "./results/case_001"
+dfler --evidence "./flight_logs" --output "./results/case_001"
 ```
 
-**2. Check Evidence Only:**
+**2. Run Pipeline with Custom Model:**
 ```bash
-dfler check --evidence "./flight_logs" --output "./results/case_001"
-```
-
-**3. Run NER on existing timeline:**
-```bash
-dfler ner --output "./results/case_001"
+dfler --evidence "./flight_logs" --output "./results/case_001" --model "./local_model_dir"
 ```
 
 ## Output Structure
 
-Running `dfler all` will create the following structure in your output directory:
+Running `dfler` will create the following structure in your output directory:
 
 ```text
 output_dir/
@@ -112,7 +97,7 @@ You can optionally use a `config.json` file instead of passing long arguments.
 
 Run with config:
 ```bash
-dfler all --config my_config.json
+dfler --config my_config.json
 ```
 
 ## License

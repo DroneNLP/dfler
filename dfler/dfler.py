@@ -236,23 +236,11 @@ def run_report(config):
 def main():
     parser = argparse.ArgumentParser(description="Drone Flight Log Entity Recognizer (DFLER)")
     
-    # Commons arguments
-    parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument("--config", help="Path to configuration file")
-    parent_parser.add_argument("--output", help="Output directory")
-    parent_parser.add_argument("--evidence", help="Evidence directory")
-    parent_parser.add_argument("--model", help="Model directory or HuggingFace model ID (default: swardiantara/droner)")
-
-    parser = argparse.ArgumentParser(description="Drone Flight Log Entity Recognizer (DFLER)")
-    
-    subparsers = parser.add_subparsers(dest="command", help="Command to run")
-    
-    # Subcommands
-    subparsers.add_parser("check", help="Check evidence files", parents=[parent_parser])
-    subparsers.add_parser("timeline", help="Construct forensic timeline", parents=[parent_parser])
-    subparsers.add_parser("ner", help="Run Named Entity Recognition", parents=[parent_parser])
-    subparsers.add_parser("report", help="Generate forensic report", parents=[parent_parser])
-    subparsers.add_parser("all", help="Run all steps", parents=[parent_parser])
+    # Global arguments
+    parser.add_argument("--config", help="Path to configuration file")
+    parser.add_argument("--output", help="Output directory")
+    parser.add_argument("--evidence", help="Evidence directory")
+    parser.add_argument("--model", help="Model directory or HuggingFace model ID (default: swardiantara/droner)")
     
     args = parser.parse_args()
 
@@ -291,22 +279,20 @@ def main():
     # Update config flat parameter for generate_report compatibility
     config['wkhtml_path'] = real_wkhtml_path
 
-    # Dispatch
-    if args.command == "check":
-        check_evidence(config)
-    elif args.command == "timeline":
-        construct_timeline(config)
-    elif args.command == "ner":
-        run_ner(config)
-    elif args.command == "report":
-        run_report(config)
-    elif args.command == "all":
-        if check_evidence(config):
-            if construct_timeline(config):
-                if run_ner(config):
-                    run_report(config)
+    # Pipeline Execution
+    if check_evidence(config):
+        if construct_timeline(config):
+            if run_ner(config):
+                if run_report(config):
+                    print("\nDFLER Pipeline completed successfully.")
+                else:
+                    print("\nDFLER Pipeline failed at report generation.")
+            else:
+                print("\nDFLER Pipeline failed at Entity Recognition.")
+        else:
+            print("\nDFLER Pipeline failed at Forensic timeline construction.")
     else:
-        parser.print_help()
+        print("\nDFLER Pipeline failed at Evidence checking.")
 
 if __name__ == "__main__":
     main()

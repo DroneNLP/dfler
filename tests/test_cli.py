@@ -18,26 +18,14 @@ def output_dir(tmp_path):
     d.mkdir()
     return d
 
-def test_check_command(evidence_dir, output_dir):
-    with patch("sys.argv", ["dfler", "check", "--evidence", str(evidence_dir), "--output", str(output_dir)]):
-        with patch("dfler.dfler.check_evidence") as mock_check:
+def test_pipeline(evidence_dir, output_dir):
+    with patch("sys.argv", ["dfler", "--evidence", str(evidence_dir), "--output", str(output_dir), "--model", "dummy_model"]):
+        with patch("dfler.dfler.check_evidence", return_value=True) as mock_check, \
+             patch("dfler.dfler.construct_timeline", return_value=True) as mock_timeline, \
+             patch("dfler.dfler.run_ner", return_value=True) as mock_ner, \
+             patch("dfler.dfler.run_report", return_value=True) as mock_report:
             main()
             mock_check.assert_called_once()
-
-def test_timeline_command(output_dir):
-    with patch("sys.argv", ["dfler", "timeline", "--output", str(output_dir)]):
-        with patch("dfler.dfler.construct_timeline") as mock_timeline:
-            main()
             mock_timeline.assert_called_once()
-
-def test_ner_command(output_dir):
-    with patch("sys.argv", ["dfler", "ner", "--output", str(output_dir), "--model", "dummy_model"]):
-        with patch("dfler.dfler.run_ner") as mock_ner:
-            main()
             mock_ner.assert_called_once()
-
-def test_report_command(output_dir):
-    with patch("sys.argv", ["dfler", "report", "--output", str(output_dir)]):
-        with patch("dfler.dfler.run_report") as mock_report:
-            main()
             mock_report.assert_called_once()
