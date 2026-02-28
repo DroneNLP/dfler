@@ -176,8 +176,10 @@ def run_ner(config):
     model_dir = config.get('model_dir')
     use_cuda = config.get('use_cuda', False)
 
-    if not os.path.exists(os.path.join(model_dir, 'pytorch_model.bin')):
-        print(f'The model file is not found at {model_dir}.')
+    # If model_dir is an existing local directory, ensure it contains the model bin
+    # Otherwise, we assume it is a HuggingFace model ID (like swardiantara/droner)
+    if os.path.isdir(model_dir) and not os.path.exists(os.path.join(model_dir, 'pytorch_model.bin')):
+        print(f'The local model directory exists, but pytorch_model.bin is missing at {model_dir}.')
         return False
     
     timeline_path = os.path.join(output_dir, 'forensic_timeline.csv')
@@ -239,7 +241,7 @@ def main():
     parent_parser.add_argument("--config", help="Path to configuration file")
     parent_parser.add_argument("--output", help="Output directory")
     parent_parser.add_argument("--evidence", help="Evidence directory")
-    parent_parser.add_argument("--model", help="Model directory")
+    parent_parser.add_argument("--model", help="Model directory or HuggingFace model ID (default: swardiantara/droner)")
 
     parser = argparse.ArgumentParser(description="Drone Flight Log Entity Recognizer (DFLER)")
     
@@ -263,6 +265,9 @@ def main():
     if args.model: config['model_dir'] = args.model
     
     # Defaults
+    if 'model_dir' not in config:
+        config['model_dir'] = "swardiantara/droner"
+        
     if 'output_dir' not in config:
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
         config['output_dir'] = os.path.join('result', now)
