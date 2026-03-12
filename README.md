@@ -1,50 +1,104 @@
-# [DFLER: Drone Flight Log Entity Recognizer to Support Forensic Investigation on Drone Device](https://www.sciencedirect.com/science/article/pii/S2665963822001415)
+# [DFLER: Drone Flight Log Entity Recognizer](https://www.sciencedirect.com/science/article/pii/S2665963822001415)
 
-DFLER is an open-source CLI-based tool developed using Python programming language and supported by a fine-tuned BERT model to perform named entity recognition on drone flight log data, specifically the log messages. The BERT model is hosted on the HuggingFace platform to make it publicly available and accessible. The tool expects decrypted DJI flight log files as input and generates a forensic report in a PDF containing a forensic timeline with the highlighted parts on the mentioned entities in the log messages. The generated file can be used as an attachment to a complete forensic report and help the forensic investigator pinpoint critical events on the constructed forensic timeline.
+DFLER is an open-source tool developed to perform named entity recognition on drone flight log data to support forensic investigations. It uses a fine-tuned BERT model to identify entities (like Actions, Components, Issues) in log messages and constructs a forensic timeline.
 
-DFLER has three core features i.e., forensic timeline construction, entity recognition and forensic report generation. The needed input are flight log files that can be acquired from controller devices such as Android-based or iOS-based smartphone.
+## Features
+- **Forensic Timeline Construction**: Merges and sorts logs from Android and iOS devices.
+- **Entity Recognition**: Uses a BERT model to highlight key entities in log messages.
+- **Forensic Report Generation**: Generates a PDF report with statistics and the highlighted timeline.
 
-## Files Structure
+## Installation
 
-Here is the folder structure of DFLER. There will be more files in `flight_logs` and `sample_output` folder, as we prepared a number of decrypted flight log files for input.
+### Prerequisites
+1.  **Python 3.7+**
+2.  **wkhtmltopdf**: Required for report generation.
+    *   **Windows**: Download and install from [wkhtmltopdf.org](https://wkhtmltopdf.org/downloads.html/). Default path: `C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe`.
+    *   **Linux**: `sudo apt-get install wkhtmltopdf`. Default path: `/usr/bin/wkhtmltopdf`.
 
-```
-.
-├── flight_logs                 # Source evidence for input
-│   ├── android
-│   ├── ios
-├── model                       # To store the NER model
-├── outputs
-│   ├── 20221128_201545         # Generated folder to store output files
-├── sample_output               # Sample output of a successful execution.
-│   ├── parsed                  # Parsed message found in flight log
-├── .gitignore
-├── config.json                 # Some configuration parameter
-├── dfler.py                    # Main file to run
-├── generate_report.py          # Function to generate the forensic report
-├── LICENSE
-├── parse.py                    # Function to parse the flight log message
-├── README.md
-└── requirements.txt            # List of dependency packages
-```
+### Install DFLER
+You can install DFLER directly from PyPI (coming soon) or from source.
 
-## How to run
-
-Before starting the tool, make sure all the dependencies listed in **requirements.txt** are installed. To convert the generated HTML report file into PDF, we use the [`wkhtmltopdf`](https://wkhtmltopdf.org/downloads.html/) engine. Therefore, make sure to install the engine first, and set the executable path in the `config.json` file accordingly. Usually, the executable path is in `C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe` path. While for a Linux-based system like Ubuntu, it is stored in `/usr/bin/wkhtmltopdf` folder by default.
-
-We have provided several flight log files that we extracted from Android- and iOS-based controller devices of VTO Labs drone forensic image [dataset](https://www.vtolabs.com/drone-forensics/) for samples. To perform named entity recognition, we need the fine-tuned BERT model. The mode is hosted on a public Huggingface repository. Clone the repository by issuing the command:
-
+**From Source:**
 ```bash
-git lfs install
-git clone https://huggingface.co/swardiantara/droner
+git clone https://github.com/DroneNLP/dfler.git
+cd dfler
+pip install .
 ```
 
-After finish downloading the model, copy the model file (`pytorch_model.bin`) to the **`model`** folder.
-Having all the dependency packages, engine, model and input files prepared, simply run the command `python dfler.py` to run the tools. The results of every step will be saved into **`/outputs/yyyymmdd_HHMMSS`** folder.
+### Model
+DFLER uses a fine-tuned BERT model (`dronenlp/DroNER`). By default, the tool will **automatically download and cache** the model from Hugging Face on its first run.
 
-> **Note:** Run the step **sequentially** to avoid error, because every step is depending on the previous step.
+If you prefer to use a locally downloaded model or an offline environment, you can point to your local directory containing `pytorch_model.bin` using the `--model` argument.
 
-## Sample Output
+## Usage
 
-We provide a sample of output if all steps are running successfully. There will be several files resulted as listed in `sample_output` folder. The final output report file contains a forensic report along with an attached highlighted forensic timeline that is constructed from several flight log files. The highlighted timeline is expected to be able to support the forensic investigator in pinpointing mentioned entities.
-We have tested the tool both on Windows and Ubuntu Operating System. The tool is running smoothly, except for the generated PDF file, which resulting in a slightly different file.
+DFLER provides a Command Line Interface (CLI).
+
+**Structure:**
+```bash
+dfler [arguments]
+```
+
+### Arguments
+
+| Argument | Description |
+| :--- | :--- |
+| `--evidence <path>` | Path to the directory containing input flight logs (must have `android` and/or `ios` subfolders). |
+| `--output <path>` | Path to the directory where results will be saved. |
+| `--model <path>` | Path to the directory containing the BERT model (`pytorch_model.bin`). |
+| `--config <path>` | Path to a custom `config.json` file. |
+
+### Examples
+
+**1. Run Pipeline (Recommended):**
+```bash
+dfler --evidence "./flight_logs" --output "./results/case_001"
+```
+
+**2. Run Pipeline with Custom Model:**
+```bash
+dfler --evidence "./flight_logs" --output "./results/case_001" --model "./local_model_dir"
+```
+
+## Output Structure
+
+Running `dfler` will create the following structure in your output directory:
+
+```text
+output_dir/
+├── raw_list.json             # List of detected log files
+├── forensic_timeline.csv     # Merged and sorted timeline of all logs
+├── ner_result.json           # Timeline with detected entities (JSON format)
+├── statistics.json           # Counts of detected entity types
+├── forensic_report_.html     # Intermediate HTML report
+├── forensic_report_.pdf      # Final PDF Forensic Report
+└── parsed/                   # Intermediate parsed CSVs
+    ├── android/
+    └── ios/
+```
+
+## Configuration
+
+You can optionally use a `config.json` file instead of passing long arguments.
+
+**Example `config.json`:**
+```json
+{
+    "source_evidence": "./flight_logs",
+    "output_dir": "./results/test_run",
+    "model_dir": "./model",
+    "wkhtml_path": {
+        "windows": "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+        "linux": "/usr/bin/wkhtmltopdf"
+    },
+    "use_cuda": true
+}
+```
+
+Run with config:
+```bash
+dfler --config my_config.json
+```
+
+## License
+[MIT](LICENSE)
