@@ -177,7 +177,7 @@ def run_ner(config):
     use_cuda = config.get('use_cuda', False)
 
     # If model_dir is an existing local directory, ensure it contains the model bin
-    # Otherwise, we assume it is a HuggingFace model ID (like swardiantara/droner)
+    # Otherwise, we assume it is a HuggingFace model ID (like dronenlp/DroNER)
     if os.path.isdir(model_dir) and not os.path.exists(os.path.join(model_dir, 'pytorch_model.bin')):
         print(f'The local model directory exists, but pytorch_model.bin is missing at {model_dir}.')
         return False
@@ -240,7 +240,7 @@ def main():
     parser.add_argument("--config", help="Path to configuration file")
     parser.add_argument("--output", help="Output directory")
     parser.add_argument("--evidence", help="Evidence directory")
-    parser.add_argument("--model", help="Model directory or HuggingFace model ID (default: swardiantara/droner)")
+    parser.add_argument("--model", help="Model directory or HuggingFace model ID (default: dronenlp/DroNER)")
     
     args = parser.parse_args()
 
@@ -254,7 +254,7 @@ def main():
     
     # Defaults
     if 'model_dir' not in config:
-        config['model_dir'] = "swardiantara/droner"
+        config['model_dir'] = "dronenlp/DroNER"
         
     if 'output_dir' not in config:
         now = datetime.now().strftime("%Y%m%d_%H%M%S")

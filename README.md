@@ -26,7 +26,7 @@ pip install .
 ```
 
 ### Model
-DFLER uses a fine-tuned BERT model (`swardiantara/droner`). By default, the tool will **automatically download and cache** the model from Hugging Face on its first run.
+DFLER uses a fine-tuned BERT model (`dronenlp/DroNER`). By default, the tool will **automatically download and cache** the model from Hugging Face on its first run.
 
 If you prefer to use a locally downloaded model or an offline environment, you can point to your local directory containing `pytorch_model.bin` using the `--model` argument.
 
