@@ -18,7 +18,7 @@ classifiers = [
 requires-python = ">=3.7"
 dependencies = [
     "simpletransformers>=0.63.6",
-    "seqeval>=1.22.0",
+    "seqeval>=1.2.2",
     "pandas",
     "numpy",
     "torch",
